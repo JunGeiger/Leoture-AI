@@ -1,0 +1,53 @@
+PUT /collections/dialogue_memory
+{
+  "vectors": {
+    "": {
+      "size": 1024,
+      "distance": "Cosine",
+      "datatype": "float32",
+      "memory": "cached",
+      "payload": {
+        "memory": "cached"
+      },
+      "hnsw_config": {
+        "m": 16,
+        "ef_construct": 100,
+        "full_scan_threshold": 10000,
+        "max_indexing_threads": 0,
+        "memory": "cached"
+      },
+      "quantization_config": {
+        "scalar": {
+          "type": "int8",
+          "quantile": 0.99,
+          "memory": "cached"
+        }
+      }
+    }
+  }
+}
+
+// Payload Indexes
+PUT /collections/dialogue_memory/index
+{
+  "field_name": "metadata.use_case",
+  "field_schema": {
+    "type": "keyword"
+  }
+}
+
+PUT /collections/dialogue_memory/index
+{
+  "field_name": "metadata.user_id",
+  "field_schema": {
+    "type": "keyword"
+  }
+}
+
+PUT /collections/dialogue_memory/index
+{
+  "field_name": "metadata.session_id",
+  "field_schema": {
+    "type": "keyword"
+  }
+}

@@ -1,0 +1,39 @@
+# 热加载模型和提示词配置时，改完了以后，要回到主配置进行保存一次
+preset_values:
+  # 版本号不可以使用 0.0.1 这种，viper不支持 "." 作为key 字符
+  v0001:
+    prompt_params:
+      role: "你是一个专业的数码博主，具有丰富的手机和笔记本电脑知识，还拥有很多相关设备评测经验。"
+      context: []
+      constraints:
+        - "如果用户提问你不知道的硬件知识，首先告诉用户你没有使用过，然后根据用户问题回答你知道的内容"
+      output_format:
+        - "回答内容不允许有特殊符号，以常见文字或者常见字符替代。"
+        - "回答内容严格使用标准markdown格式进行输出。"
+    # 绑定的模型名称，需要先在 model_providers 中定义
+    model_params:
+      # 模型供应商
+      provider: aliyun
+      # 只能设置模型供应商已提供的模型
+      model: "deepseek-v4-flash-0731"
+      # 必填，模型上下文大小，max_completion_tokens必须小于context_window。
+      context_window: 32768
+      # 采样温度，范围[0.0, 2.0]。值越高输出越随机，值越低越确定。一般只调此参数或 top_p 之一。
+      temperature: 0.8
+      # 核采样概率阈值，范围(0.0, 1.0]。top_p=0 会被平台归一化为 null（等效默认值）。
+      top_p: 0
+      # 单次响应最大输出 Token 数。超出后 finish_reason 为 "length"。
+      max_completion_tokens: 32768
+      # 供应商模型特有参数，使用供应商参数名直接定义，不一致将会导致参数不生效或者api调用报错
+      extra_params:
+        # 是否启用思考模式
+        enable_thinking: false
+        enable_search: false
+      # 实际应用可调参数
+      rag_params:
+        # 向量库检索结果粗排
+        retrieval_top_k: 30
+        # Rerank 精排
+        rerank_top_k: 5
+        # 相关性阈值, 低于此分数的直接过滤掉
+        score_threshold: 0.7

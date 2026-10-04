@@ -1,0 +1,30 @@
+info:
+  name: chat
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://127.0.0.1:8088/api/v1/generalChat
+  headers:
+    - name: Accept
+      value: text/event-stream
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+        "useCase": "general_chat_test",
+        "userID": "01a08ee9-3ac3-737f-8238-d9ee90ddafee",
+        "sessionID": "01a08ee9-5ac5-737f-8238-e16fc777a768",
+        "dialogueID": "01a08ee9-5ac5-737f-8238-e957a44d3d12",
+        "enabledStream": false,
+        "task": "AMD hx370 这款芯片怎么样"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

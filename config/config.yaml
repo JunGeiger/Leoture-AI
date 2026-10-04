@@ -1,0 +1,216 @@
+# 项目配置
+app:
+  # 项目名称
+  name: LeotureAI
+  # 项目版本
+  version: 0.0.1
+  # 环境模式 dev | test | staging | prod
+  env:
+
+# HTTP服务配置
+server:
+  # 服务监听地址
+  host: 127.0.0.1
+  # 服务监听端口
+  port: 8088
+  # 运行模式: debug | release | test
+  mode: debug
+
+# 项目日志配置 (slog)
+log:
+  # 日志级别: debug | info | warn | error
+  level: debug
+  # 日志格式: json | text
+  format: json
+  # 是否记录源码位置（文件名 + 行号）
+  add_source: true
+  # 日志文件路径，空值表示输出到 stdout
+  file_path:
+  # 单个日志文件最大大小（MB）
+  max_size: 10
+  # 保留的旧日志文件数量
+  max_backups: 10
+  # 日志保留天数
+  max_age: 3
+  # 是否压缩旧日志文件
+  compress: false
+
+# Redis 缓存配置 (go-redis)
+redis:
+  # 地址（host:port）
+  addr:
+  # 密码
+  password:
+  # 数据库编号
+  database:
+  # 连接池最大连接数
+  pool_size: 10
+  # 最小空闲连接数
+  min_idle_conns: 5
+  # 连接最大存活时间 ns | us | ms | s | m | h
+  conn_max_lifetime: 1h
+  # 空闲连接最大存活时间 ns | us | ms | s | m | h
+  conn_max_idle_time: 5m
+  # 建立连接超时 ns | us | ms | s | m | h
+  dial_timeout: 5s
+  # 读超时 ns | us | ms | s | m | h
+  read_timeout: 3s
+  # 写超时 ns | us | ms | s | m | h
+  write_timeout: 3s
+  # 连接池获取连接超时 ns | us | ms | s | m | h
+  pool_timeout: 4s
+
+# qdrant 数据库配置
+qdrant:
+  # qdrant 服务主机地址
+  addr:
+  # Qdrant gRPC 端口，默认 6334
+  grpc_port:
+  # Qdrant REST API 端口，默认 6333
+  rest_port:
+  # 服务端鉴权 key，空表示不启用
+  api_key:
+  # 跳过客户端与服务端版本兼容性校验，生产环境建议关闭
+  skip_compat_check: true
+  # gRPC 连接池大小，0 使用默认值 3，推荐值: 预期并发数 / 2
+  pool_size: 4
+  # TCP KeepAlive 探测间隔（秒）
+  keep_alive_time: 30
+  # TCP KeepAlive 探测超时（秒）
+  keep_alive_timeout: 5
+  # gRPC 调用最大重试次数，0 不重试，由业务逻辑自行处理
+  max_retries: 0
+  # gRPC 拨号超时（秒）
+  dial_timeout: 5s
+  # gRPC 空闲连接释放超时（秒）
+  dial_idle_timeout: 45s
+  # 已有的collection，每个collection对应一个Retriever
+  collections: ["dialogue_memory"]
+
+# 服务观测组件
+langfuse:
+  # 是否开启
+  enabled: true
+  # Langfuse 服务地址，自托管填内网域名
+  host:
+  # 项目公钥
+  public_key:
+  # 项目私钥
+  secret_key:
+  # 异步上报 worker 数，RAG 灌库期建议 4~8
+  threads: 4
+  # 单次 HTTP 上报超时，防 Langfuse 抖动拖死主链路
+  timeout: 10s
+  # 内存队列上限，灌库期防丢 trace
+  max_task_queue_size: 2000
+  # 单个事件最大字节，超了截断大字段（input/output）
+  max_event_size_bytes: 2000000
+  # 攒够 N 条事件批量发送，降低请求数
+  flush_at: 15
+  # 多久强制刷一次（不管攒没攒够）
+  flush_interval: 3s
+  # 采样率，压测可调低
+  sample_rate: 1.0
+  # 上报失败重试次数
+  max_retry: 3
+
+# 模型供应商清单
+model_services:
+  # 本地模型 provider 固定为 leoture
+  - provider: leoture
+    # 是否启用
+    enabled: true
+    # 可用模型标识符，模型类型 chat、embedding、reranker 走openai api，agent 走 anthropic api
+    chat_models: ["Qwen3-0.6B"]
+    embedding_models: ["Qwen3-Embedding-0.6B"]
+    reranker_models: ["Qwen3-Reranker-0.6B"]
+    # 供应商提供的 API Key
+    api_key: "${MODEL_PROVIDER_LEOTURE_API_KEY}"
+    # 供应商提供的 API 端点
+    base_url: "${MODEL_PROVIDER_LEOTURE_BASE_URL}"
+    # 请求失败最大重试次数
+    max_retries: 3
+    # 请求超时时长 ns | us | ms | s | m | h
+    timeout: 120s
+    # 业务语义标签，自动合并后上报 Langfuse 用于过滤和聚合
+    tags: ["leoture","slm","rag"]
+  # 模型供应商，prompt 模板需要严格对应，否则无法正常调用
+  - provider: aliyun
+    # 是否启用
+    enabled: true
+    # 可用模型标识符，模型类型 chat、embedding、reranker 走openai api，agent 走 anthropic api
+    chat_models: ["qwen3.8-flash", "qwen3.8-max-0902", "kimi-k3", "glm-5.2", "deepseek-v4-pro-0813", "deepseek-v4-flash-0731", "qwen3.7-flash"]
+    agent_models: []
+    # 供应商提供的 API Key
+    api_key: "${MODEL_PROVIDER_ALIYUN_API_KEY}"
+    # 供应商提供的 API 端点
+    base_url: "${MODEL_PROVIDER_ALIYUN_BASE_URL}"
+    # 请求失败最大重试次数
+    max_retries: 3
+    # 请求超时时长 ns | us | ms | s | m | h
+    timeout: 120s
+    # 业务语义标签，自动合并后上报 Langfuse 用于过滤和聚合
+    tags: ["aliyun", "llm","free"]
+  - provider: tencent
+    # 是否启用
+    enabled: true
+    # 可用模型标识符，模型类型 chat、embedding、reranker 走openai api，agent 走 anthropic api
+    chat_models: ["hy4-preview", "hy3", "deepseek-v4-flash", "deepseek-v4-flash-0731", "glm-5.3-flash", "kimi-k3"]
+    agent_models: []
+    # 供应商提供的 API Key
+    api_key: "${MODEL_PROVIDER_TENCENT_API_KEY}"
+    # 供应商提供的 API 端点
+    base_url: "${MODEL_PROVIDER_TENCENT_BASE_URL}"
+    # 请求失败最大重试次数
+    max_retries: 3
+    # 请求超时时长 ns | us | ms | s | m | h
+    timeout: 120s
+    # 业务语义标签，自动合并后上报 Langfuse 用于过滤和聚合
+    tags: ["tencent", "llm","free"]
+
+# 场景应用清单
+chat_model_prompts:
+  # 场景标识符，即对话分组title，每个场景除了依赖eino图编排，还需要实现service层业务逻辑
+  - use_case: general_chat_ai
+    # 是否启用该场景
+    # 热加载模型和提示词配置时，先设置为false，然后改完相关配置后，再改回true，否则无法热更新
+    enabled: true
+    # prompt、model 配置文件路径
+    prompt_path: "./config/prompts/general_chat_ai_prompt.yaml"
+    # prompt 配置版本，在配置文件中进行定义和管理，允许加载多个版本的配置
+    prompt_version: "v0001"
+    # prompt 渲染模板文件路径，已在编排中传入，所以不支持热更新。
+    # 同时模板应该当作资源固定下载，变化停留在内容层面。
+    messages_assistant_path: "./config/prompts/template/openai_message_assistant.tmpl"
+    messages_system_path: "./config/prompts/template/openai_message_system.tmpl"
+    messages_user_path: "./config/prompts/template/openai_message_user.tmpl"
+    # 是否外挂知识库
+    use_knowledge: false
+    # 除了 dialogue_memory 之外其他知识库集合名称
+    knowledge_collections: []
+    # 业务语义标签，自动合并后上报 Langfuse 用于过滤和聚合
+    tags: ["general_chat_ai"]
+    # 描述信息，用于文档说明和 Langfuse trace 展示
+    description: "GeneralChat AI项目"
+    # 场景标识符，即对话分组title，每个场景除了依赖eino图编排，还需要实现service层业务逻辑
+  - use_case: general_chat_test
+    # 是否启用该场景
+    # 热加载模型和提示词配置时，改完了以后，要回到此主配置进行保存一次
+    enabled: true
+    # prompt、model 配置文件路径
+    prompt_path: "./config/prompts/general_chat_test_prompt.yaml"
+    # prompt 配置版本，在配置文件中进行定义和管理，允许加载多个版本的配置
+    prompt_version: "v0001"
+    # prompt 渲染模板文件路径，已在编排中传入，所以不支持热更新。
+    # 同时模板应该当作资源固定下载，变化停留在内容层面。
+    messages_assistant_path: "./config/prompts/template/openai_message_assistant.tmpl"
+    messages_system_path: "./config/prompts/template/openai_message_system.tmpl"
+    messages_user_path: "./config/prompts/template/openai_message_user.tmpl"
+    # 是否外挂知识库
+    use_knowledge: false
+    # 除了 dialogue_memory 之外其他知识库集合名称
+    knowledge_collections: []
+    # 业务语义标签，自动合并后上报 Langfuse 用于过滤和聚合
+    tags: ["general_chat_test"]
+    # 描述信息，用于文档说明和 Langfuse trace 展示
+    description: "GeneralChat AI项目"

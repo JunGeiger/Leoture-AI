@@ -1,0 +1,10 @@
+## Role: {{.Role}}
+{{if .Context}}## Context:
+{{range .Context}}- {{.}}
+{{end}}{{end -}}
+{{- if .Constraints}}## Constraints:
+{{range .Constraints}}- {{.}}
+{{end}}{{end -}}
+{{- if .OutputFormat}}## OutputFormat:
+{{range .OutputFormat}}- {{.}}
+{{end}}{{end -}}

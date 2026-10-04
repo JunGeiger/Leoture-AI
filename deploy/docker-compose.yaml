@@ -1,0 +1,5 @@
+include:
+  - path: redis-compose.yaml
+  - path: qdrant-compose.yaml
+  - path: llama-compose.yaml
+  - path: lanfuse-compose.yaml

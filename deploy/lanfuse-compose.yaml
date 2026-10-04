@@ -1,0 +1,69 @@
+services:
+  langfuse-server:
+    image: langfuse/langfuse:2.95.11
+    container_name: langfuse_server
+    restart: unless-stopped
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    ports:
+      - "13010:3000"
+    networks:
+      - langfuse-server-net
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_langfuse@localhost:5432/postgres # localhost 需替换为宿主机IP 或者 实际部署 IP
+      - NEXTAUTH_SECRET=mysecret
+      - SALT=mysalt
+      - ENCRYPTION_KEY=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 # generate via `openssl rand -hex 32`
+      - NEXTAUTH_URL=http://localhost:3000
+      - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
+      - LANGFUSE_INIT_ORG_ID=${LANGFUSE_INIT_ORG_ID:-leoture-ai-org}
+      - LANGFUSE_INIT_ORG_NAME=${LANGFUSE_INIT_ORG_NAME:-Leoture AI}
+      - LANGFUSE_INIT_PROJECT_ID=${LANGFUSE_INIT_PROJECT_ID:-leoture-ai-dev}
+      - LANGFUSE_INIT_PROJECT_NAME=${LANGFUSE_INIT_PROJECT_NAME:-Leoture AI Dev}
+      - LANGFUSE_INIT_PROJECT_PUBLIC_KEY=${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:-pk-lf-leoture-dev-0001}
+      - LANGFUSE_INIT_PROJECT_SECRET_KEY=${LANGFUSE_INIT_PROJECT_SECRET_KEY:-sk-lf-leoture-dev-0001}
+      - LANGFUSE_INIT_USER_EMAIL=${LANGFUSE_INIT_USER_EMAIL:-jungeiger@leotureai.com}
+      - LANGFUSE_INIT_USER_NAME=${LANGFUSE_INIT_USER_NAME:-jungeiger}
+      - LANGFUSE_INIT_USER_PASSWORD=${LANGFUSE_INIT_USER_PASSWORD:-jungeiger_leotureai}
+
+  langfuse-db:
+    image: postgres:17.10
+    container_name: langfuse_postgres17
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    environment:
+      TZ: Asia/Shanghai # 设置容器时区
+      PGTZ: Asia/Shanghai # 设置postgres时区
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_langfuse
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+    networks:
+      - langfuse-postgres-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  langfuse_db_data:
+    driver: local
+
+networks:
+  langfuse-server-net:
+    name: langfuse_server_net
+    driver: bridge
+  langfuse-postgres-net:
+    name: langfuse_postgres_net
+    driver: bridge

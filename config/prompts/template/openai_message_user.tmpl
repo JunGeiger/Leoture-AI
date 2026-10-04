@@ -1,0 +1,10 @@
+## Task: {{.Task}}
+{{if .Example}}## Example: {{.Example}}
+Note: 上述 Example 的输出格式仅为示意，最终输出必须严格遵循 OutputFormat 字段约束。
+{{end -}}
+{{- if .References}}## References:
+{{range .References}}- {{.}}
+{{end}}{{end -}}
+{{- if .Instructions}}## Instructions:
+{{range .Instructions}}- {{.}}
+{{end}}{{end -}}

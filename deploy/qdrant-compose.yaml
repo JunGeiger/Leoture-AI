@@ -1,0 +1,39 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.0
+    container_name: qdrant
+    restart: unless-stopped
+    # 6333 REST API + Dashboard，6334 gRPC API，Go client
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+      - qdrant_snapshots:/qdrant/snapshots
+      - ./qdrant/qdrant.yaml:/qdrant/config/qdrant.yaml:ro
+    networks:
+      - qdrant-net
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: "6333"
+      QDRANT__SERVICE__GRPC_PORT: "6334"
+      QDRANT__SERVICE__API_KEY: "01a094e6-f39f-7343-9f0f-0e8ea3b0b6bc"
+      QDRANT__SERVICE__READ_ONLY_API_KEY: "01a094e6-f39f-7343-9f0f-11c87ecbe6f8"
+    # 以下字段 docker compose up 生效
+    cpus: "6"
+    mem_limit: 6g
+    memswap_limit: 6g
+    mem_reservation: 3g
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+volumes:
+  qdrant_storage:
+    driver: local
+  qdrant_snapshots:
+    driver: local
+networks:
+  qdrant-net:
+    name: qdrant_net
+    driver: bridge

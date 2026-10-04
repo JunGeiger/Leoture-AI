@@ -1,0 +1,39 @@
+services:
+  llama-server:
+    image: llama.cpp:server-b10689
+    container_name: llama_server
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./models:/models:ro
+      - ./logs:/logs
+    networks:
+      - llama-server-net
+    command:
+      - --models-preset
+      - /models/llama-server.ini
+      - --models-autoload
+      - --models-max
+      - "3"
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8080"
+      - --api-key
+      - "01a06ab0-c237-724c-8505-b3e1a2450bbf"
+    # 以下字段 docker compose up 生效
+    cpus: "14"
+    mem_limit: 9g
+    memswap_limit: 9g
+    mem_reservation: 4g
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+networks:
+  llama-server-net:
+    name: llama_server_net
+    driver: bridge
